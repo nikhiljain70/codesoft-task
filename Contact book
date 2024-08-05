@@ -1,0 +1,118 @@
+import sqlite3
+
+# Create database and table
+def create_db():
+    conn = sqlite3.connect('contacts.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS contacts
+                 (id INTEGER PRIMARY KEY, name TEXT, phone TEXT, email TEXT, address TEXT)''')
+    conn.commit()
+    conn.close()
+
+# Add contact
+def add_contact():
+    name = input("Enter name: ")
+    phone = input("Enter phone: ")
+    email = input("Enter email: ")
+    address = input("Enter address: ")
+    if name and phone and email and address:
+        conn = sqlite3.connect('contacts.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO contacts (name, phone, email, address) VALUES (?, ?, ?, ?)", 
+                  (name, phone, email, address))
+        conn.commit()
+        conn.close()
+        print("Contact added successfully")
+    else:
+        print("All fields are required")
+
+# View contacts
+def view_contacts():
+    conn = sqlite3.connect('contacts.db')
+    c = conn.cursor()
+    c.execute("SELECT id, name, phone FROM contacts")
+    contacts = c.fetchall()
+    conn.close()
+    
+    if contacts:
+        for contact in contacts:
+            print(f"{contact[0]}: {contact[1]} - {contact[2]}")
+    else:
+        print("No contacts found")
+
+# Search contacts
+def search_contacts():
+    query = input("Enter name or phone to search: ")
+    conn = sqlite3.connect('contacts.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM contacts WHERE name LIKE ? OR phone LIKE ?", ('%' + query + '%', '%' + query + '%'))
+    contacts = c.fetchall()
+    conn.close()
+    
+    if contacts:
+        for contact in contacts:
+            print(f"{contact[0]}: {contact[1]}, {contact[2]}, {contact[3]}, {contact[4]}")
+    else:
+        print("No contacts found")
+
+# Update contact
+def update_contact():
+    id = input("Enter contact ID to update: ")
+    new_name = input("Enter new name: ")
+    new_phone = input("Enter new phone: ")
+    new_email = input("Enter new email: ")
+    new_address = input("Enter new address: ")
+    if id and new_name and new_phone and new_email and new_address:
+        conn = sqlite3.connect('contacts.db')
+        c = conn.cursor()
+        c.execute("UPDATE contacts SET name=?, phone=?, email=?, address=? WHERE id=?", 
+                  (new_name, new_phone, new_email, new_address, id))
+        conn.commit()
+        conn.close()
+        print("Contact updated successfully")
+    else:
+        print("All fields are required")
+
+# Delete contact
+def delete_contact():
+    id = input("Enter contact ID to delete: ")
+    if id:
+        conn = sqlite3.connect('contacts.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM contacts WHERE id=?", (id,))
+        conn.commit()
+        conn.close()
+        print("Contact deleted successfully")
+    else:
+        print("ID is required")
+
+# Main menu
+def main():
+    create_db()
+    while True:
+        print("\nContact Book")
+        print("1. Add Contact")
+        print("2. View Contacts")
+        print("3. Search Contacts")
+        print("4. Update Contact")
+        print("5. Delete Contact")
+        print("6. Exit")
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            add_contact()
+        elif choice == '2':
+            view_contacts()
+        elif choice == '3':
+            search_contacts()
+        elif choice == '4':
+            update_contact()
+        elif choice == '5':
+            delete_contact()
+        elif choice == '6':
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
